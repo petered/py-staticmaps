@@ -21,6 +21,7 @@ from .tile_provider import TileProvider, tile_provider_OSM
 from .transformer import Transformer
 
 
+
 class Context:
     # pylint: disable=too-many-instance-attributes
     def __init__(self) -> None:
@@ -172,7 +173,6 @@ class Context:
         renderer.render_tiles(self._fetch_tile)
         renderer.render_objects(self._objects)
         renderer.render_attribution(self._tile_provider.attribution())
-
         return renderer.image()
 
     def render_svg(self, width: int, height: int) -> svgwrite.Drawing:

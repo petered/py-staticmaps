@@ -3,7 +3,9 @@
 
 import io
 import typing
+from typing import Union
 
+import numpy as np
 import s2sphere  # type: ignore
 from PIL import Image as PIL_Image  # type: ignore
 
@@ -14,7 +16,7 @@ from .svg_renderer import SvgRenderer
 
 
 class ImageMarker(Object):
-    def __init__(self, latlng: s2sphere.LatLng, png_file: str, origin_x: int, origin_y: int) -> None:
+    def __init__(self, latlng: s2sphere.LatLng, png_file: Union[str, PIL_Image.Image], origin_x: int, origin_y: int) -> None:
         Object.__init__(self)
         self._latlng = latlng
         self._png_file = png_file
@@ -151,7 +153,14 @@ class ImageMarker(Object):
 
     def load_image_data(self) -> None:
         """Load image data for the image marker"""
-        with open(self._png_file, "rb") as f:
-            self._image_data = f.read()
-        image = PIL_Image.open(io.BytesIO(self._image_data))
+        if isinstance(self._png_file, str):
+            with open(self._png_file, "rb") as f:
+                self._image_data = f.read()
+            image = PIL_Image.open(io.BytesIO(self._image_data))
+        else:
+            image = self._png_file
+            with io.BytesIO() as output:
+                image.save(output, format="PNG")
+                self._image_data = output.getvalue()
+
         self._width, self._height = image.size

@@ -4,6 +4,7 @@
 import os
 import pathlib
 import typing
+from typing import Optional
 
 import requests
 import slugify  # type: ignore
@@ -12,12 +13,20 @@ from .meta import GITHUB_URL, LIB_NAME, VERSION
 from .tile_provider import TileProvider
 
 
+def get_no_connection_image_data() -> bytes:
+    file_path = os.path.abspath(os.path.join(__file__, '..', 'no_connection_image.png'))
+    with open(file_path, "rb") as f:
+        return f.read()
+
+
+
 class TileDownloader:
     """A tile downloader class"""
 
-    def __init__(self) -> None:
+    def __init__(self, connection_timeout: Optional[float] = None) -> None:
         self._user_agent = f"Mozilla/5.0+(compatible; {LIB_NAME}/{VERSION}; {GITHUB_URL})"
         self._sanitized_name_cache: typing.Dict[str, str] = {}
+        self._connection_timeout = connection_timeout
 
     def set_user_agent(self, user_agent: str) -> None:
         """Set the user agent for the downloader
@@ -54,7 +63,12 @@ class TileDownloader:
         url = provider.url(zoom, x, y)
         if url is None:
             return None
-        res = requests.get(url, headers={"user-agent": self._user_agent})
+        try:
+            res = requests.get(url, headers={"user-agent": self._user_agent}, timeout=self._connection_timeout)
+        except Exception as err:
+            print(f"Error connecting.  Returning 'No Connection' tile: {err}")
+            return get_no_connection_image_data()
+
         if res.status_code == 200:
             data = res.content
         else:
