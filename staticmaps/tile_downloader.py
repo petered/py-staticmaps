@@ -12,12 +12,46 @@ import slugify  # type: ignore
 from .meta import GITHUB_URL, LIB_NAME, VERSION
 from .tile_provider import TileProvider
 
+from PIL import Image, ImageDraw, ImageFont
+import io
+
+# Global variable to store the image bytes
+NO_CONNECTION_IMAGE_BYTES: Optional[bytes] = None
+
 
 def get_no_connection_image_data() -> bytes:
-    file_path = os.path.abspath(os.path.join(__file__, '..', 'no_connection_image.png'))
-    with open(file_path, "rb") as f:
-        return f.read()
+    global NO_CONNECTION_IMAGE_BYTES
+    # Check if the image data has already been generated
+    if NO_CONNECTION_IMAGE_BYTES is not None:
+        return NO_CONNECTION_IMAGE_BYTES
 
+    # Create a new white image
+    img = Image.new('RGB', (256, 256), color='white')
+    # Get a drawing context
+    d = ImageDraw.Draw(img)
+    # Define the font
+    try:
+        font = ImageFont.load_default()
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Position the text in the center
+    text = "Could not download\nmap tiles"
+    text_width, text_height = d.textsize(text, font=font)
+    x = (img.width - text_width) / 2
+    y = (img.height - text_height) / 2
+
+    # Draw the text
+    d.text((x, y), text, font=font, fill=(225, 225, 225))
+
+    # Save image to a bytes object to simulate file I/O
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes.seek(0)  # rewind the file
+
+    # Save the bytes data to the global variable
+    NO_CONNECTION_IMAGE_BYTES = img_bytes.read()
+    return NO_CONNECTION_IMAGE_BYTES
 
 
 class TileDownloader:
