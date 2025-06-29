@@ -19,6 +19,13 @@ import io
 NO_CONNECTION_IMAGE_BYTES: Optional[bytes] = None
 
 
+def textsize(text: str, font: Optional[str] = None):  # https://stackoverflow.com/a/77749307
+    im = Image.new(mode="P", size=(0, 0))
+    draw = ImageDraw.Draw(im)
+    _, _, width, height = draw.textbbox((0, 0), text=text, font=font)
+    return width, height
+
+
 def get_no_connection_image_data() -> bytes:
     global NO_CONNECTION_IMAGE_BYTES
     # Check if the image data has already been generated
@@ -37,7 +44,7 @@ def get_no_connection_image_data() -> bytes:
 
     # Position the text in the center
     text = "Could not download\nmap tiles"
-    text_width, text_height = d.textsize(text, font=font)
+    text_width, text_height = textsize(text, font=font)
     x = (img.width - text_width) / 2
     y = (img.height - text_height) / 2
 

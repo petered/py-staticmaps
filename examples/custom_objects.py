@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from staticmaps.tile_downloader import textsize
 
 # py-staticmaps
 # Copyright (c) 2021 Florian Pigorsch; see /LICENSE for licensing information
@@ -37,7 +38,7 @@ class TextLabel(staticmaps.Object):
         x, y = renderer.transformer().ll2pixel(self.latlng())
         x = x + renderer.offset_x()
 
-        tw, th = renderer.draw().textsize(self._text)
+        tw, th = textsize(self._text)
         w = max(self._arrow, tw + 2 * self._margin)
         h = th + 2 * self._margin
 
