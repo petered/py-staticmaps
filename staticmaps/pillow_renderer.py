@@ -10,6 +10,7 @@ from PIL import ImageDraw as PIL_ImageDraw  # type: ignore
 
 from .color import Color
 from .renderer import Renderer
+from .tile_downloader import textsize
 from .transformer import Transformer
 
 if typing.TYPE_CHECKING:
